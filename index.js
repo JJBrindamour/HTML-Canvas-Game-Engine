@@ -41,7 +41,7 @@ class Utils {
     return Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2))
   }
   
-  static rotate(velocity, angle) {
+  static rotateVelocities(velocity, angle) {
     const rotatedVelocities = {
         x: velocity.x * Math.cos(angle) - velocity.y * Math.sin(angle),
         y: velocity.x * Math.sin(angle) + velocity.y * Math.cos(angle)
@@ -95,88 +95,54 @@ class Utils {
     }
   }
 
-  static resolveCollision(obj, otherObj){
-    // elastic
-    if (obj.collision == 'elastic') {
-      const xVelocityDiff = obj.velocity.x - otherObj.velocity.x;
-      const yVelocityDiff = obj.velocity.y - otherObj.vy;
-    
-      const xDist = otherObj.x - obj.x;
-      const yDist = otherObj.y - obj.y;
-    
-      // Prevent accidental overlap of objs
-      if (xVelocityDiff * xDist + yVelocityDiff * yDist >= 0) {
-    
-        // Grab angle between the two colliding objs
-        const angle = -Math.atan2(otherObj.y - obj.y, otherObj.x - obj.x);
-  
-        // Store mass in var for better readability in collision equation
-        const m1 = obj.mass;
-        const m2 = otherObj.mass;
-  
-        // Velocity before equation
-        obj.velocity.x = obj.velocity.x * Math.cos(angle) - obj.velocity.y * Math.sin(angle)
-        obj.velocity.x = obj.velocity.x * Math.sin(angle) + obj.velocity.y * Math.cos(angle)
+  static resolveCollision(object, otherObject){
+    for (const obj in [object, otherObject]) {
+      // elastic
+      if (obj.collision == 'elastic') {
+        const xVelocityDiff = object.velocity.x - otherObject.velocity.x;
+        const yVelocityDiff = object.velocity.y - otherObject.velocity.y;
+      
+        const xDist = otherObject.x - object.x;
+        const yDist = otherObject.y - object.y;
+      
+        // Prevent accidental overlap of objects
+        if (xVelocityDiff * xDist + yVelocityDiff * yDist >= 0) {
+          // Grab angle between the two colliding objects
+          const angle = -Math.atan2(otherObject.y - object.y, otherObject.x - object.x);
 
-        otherObj.velocity.x = otherObj.velocity.x * Math.cos(angle) - otherObj.velocity.y * Math.sin(angle)
-        otherObj.velocity.x = otherObj.velocity.x * Math.sin(angle) + otherObj.velocity.y * Math.cos(angle)
-  
-        // Velocity after 1d collision equation
-        let v1 = { x: u1.x * (m1 - m2) / (m1 + m2) + u2.x * 2 * m2 / (m1 + m2), y: u1.y };
-        let v2 = { x: u2.x * (m1 - m2) / (m1 + m2) + u1.x * 2 * m2 / (m1 + m2), y: u2.y };
-  
-        // Final velocity after rotating axis back to original location
-        obj.velocity.x = v1.x * Math.cos(-angle) - v1.y * Math.sin(-angle)
-        obj.velocity.x = v2.x * Math.sin(-angle) + v2.y * Math.cos(-angle)
-      }
-    }
-    
-    if (otherObj.collision == 'elastic') {
-      const xVelocityDiff = obj.velocity.x - otherObj.velocity.x;
-      const yVelocityDiff = obj.velocity.y - otherObj.vy;
-    
-      const xDist = otherObj.x - obj.x;
-      const yDist = otherObj.y - obj.y;
-    
-      // Prevent accidental overlap of objs
-      if (xVelocityDiff * xDist + yVelocityDiff * yDist >= 0) {
-    
-        // Grab angle between the two colliding objs
-        const angle = -Math.atan2(otherObj.y - obj.y, otherObj.x - obj.x);
-  
-        // Store mass in var for better readability in collision equation
-        const m1 = obj.mass;
-        const m2 = otherObj.mass;
-  
-        // Velocity before equation
-        obj.velocity.x = obj.velocity.x * Math.cos(angle) - obj.velocity.y * Math.sin(angle)
-        obj.velocity.x = obj.velocity.x * Math.sin(angle) + obj.velocity.y * Math.cos(angle)
+          // Store mass in var for better readability in collision equation
+          const m1 = object.mass;
+          const m2 = otherObject.mass;
 
-        otherObj.velocity.x = otherObj.velocity.x * Math.cos(angle) - otherObj.velocity.y * Math.sin(angle)
-        otherObj.velocity.x = otherObj.velocity.x * Math.sin(angle) + otherObj.velocity.y * Math.cos(angle)
-  
-        // Velocity after 1d collision equation
-        let v1 = { x: u1.x * (m1 - m2) / (m1 + m2) + u2.x * 2 * m2 / (m1 + m2), y: u1.y };
-        let v2 = { x: u2.x * (m1 - m2) / (m1 + m2) + u1.x * 2 * m2 / (m1 + m2), y: u2.y };
-  
-        // Final velocity after rotating axis back to original location
-        obj.velocity.x = v1.x * Math.cos(-angle) - v1.y * Math.sin(-angle)
-        obj.velocity.x = v2.x * Math.sin(-angle) + v2.y * Math.cos(-angle)
-      }
-    }
+          // Velocity before equation
+          const u1 = this.rotateVelocities(object.velocity, angle);
+          const u2 = this.rotateVelocities(otherObject.velocity, angle);
 
-    // Inelastic
-    if (obj.collision == 'push') {
-      obj.velocity = {
-        x: (obj.mass * obj.velocity.x + otherObj.mass * otherObj.velocity.x) / (obj.mass + otherObj.mass),
-        y: (obj.mass * obj.velocity.y + otherObj.mass * otherObj.velocity.y) / (obj.mass + otherObj.mass),
+          // Velocity after 1d collision equation
+          const v1 = { x: u1.x * (m1 - m2) / (m1 + m2) + u2.x * 2 * m2 / (m1 + m2), y: u1.y };
+          const v2 = { x: u2.x * (m1 - m2) / (m1 + m2) + u1.x * 2 * m2 / (m1 + m2), y: u2.y };
+
+          // Final velocity after rotating axis back to original location
+          const vFinal1 = this.rotateVelocities(v1, -angle);
+          const vFinal2 = this.rotateVelocities(v2, -angle);
+
+          // Swap obj velocities for realistic bounce effect
+          if (obj === object) {
+            obj.velocity.x = vFinal1.x;
+            obj.velocity.y = vFinal1.y;
+          } else if (obj === otherObject) {
+            obj.velocity.x = vFinal2.x;
+            obj.velocity.y = vFinal2.y;
+          }
+        }
       }
-    }
-    
-    if (otherObj.collision == 'push') {
-      otherObj.velocity = {
-        x: (obj.mass * obj.velocity.x + otherObj.mass * otherObj.velocity.x) / (obj.mass + otherObj.mass),
-        y: (obj.mass * obj.velocity.y + otherObj.mass * otherObj.velocity.y) / (obj.mass + otherObj.mass),
+      
+      // Inelastic
+      if (obj.collision == 'push') {
+        obj.velocity = {
+          x: (obj.mass * obj.velocity.x + otherObj.mass * otherObj.velocity.x) / (obj.mass + otherObj.mass),
+          y: (obj.mass * obj.velocity.y + otherObj.mass * otherObj.velocity.y) / (obj.mass + otherObj.mass),
+        }
       }
     }
   }
@@ -221,20 +187,24 @@ class Object {
     this.velocity.x = vy
   }
 
-  setCollider(shape='rect', height=this.height, width=this.height, x=this.x, y=this.y) {
+  setCollider(shape='rect', height=this.height, width=this.height, xShift=this.x, yShift=this.y) {
     this.collider = {
-      // ellipse or rect
+      /*
+      Shape Options are:
+        -ellipse
+        -rect
+      */
       shape,
       height,
       width,
-      x,
-      y,
+      xShift,
+      yShift,
     }
   }
 
   isTouching(obj) {
     if (obj.collider.shape == "ellipse" && this.collider.shape == "ellipse") {
-      return (nerdamer.solve(`(x-${this.x})/${this.width / 2}^2+(x-${this.y})/${this.height / 2}^2=(x-${obj.x})/${obj.width / 2}^2+(x-${obj.y})/${obj.height / 2}^2`).length >= 1) ? true : false
+      
     } else if (obj.collider.shape == "rect" && this.collider.shape == "rect") {
 
     } else if (obj.collider.shape == "ellipse" && this.collider.shape == "rect") {
