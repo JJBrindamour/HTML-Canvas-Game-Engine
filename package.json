@@ -1,5 +1,8 @@
 {
+  "scripts": {
+    "dev": "vite"
+  },
   "dependencies": {
-    "nerdamer": "^1.1.13"
+    "vite": "^2.8.6"
   }
 }
