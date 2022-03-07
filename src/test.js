@@ -1,32 +1,19 @@
-import { Rect, Ellipse, Text, resize, init, animate, draw, Line, Sprite, Background, BackgroundImage } from './library'
+import { Rect, Ellipse, Text, resize, init, animate, draw, Line, Sprite, Background, BackgroundImage, mouse, objects } from './library'
 
+let standStill
+let move
 resize()
 
 init(() => {
-  const r = new Rect(50, 50)
-  r.fill('red')
-
-  const t = new Text('Hello World', 100, 500)
-  t.fontSize('100px')
-  t.font('arial')
-  t.fill('pink')
-  t.strokeColor('black')
-  t.strokeWeight(3)
-
-  const l = new Line(20, 20, 75, 195, 8, 'round')
-  l.strokeColor('sage')
-
-  const i = new Sprite('../img/nebula2.jpg', 300, 50, 0.05)
-
-  const e = new Ellipse(250, 250, 100)
-  e.strokeColor('navy')
-  e.strokeWeight(8)
-  e.fill('none')
-
-  const bi = new BackgroundImage('../img/nebula1.jpg')
-  const b = new Background('darkred')
+  standStill = new Rect(innerWidth / 2 - 100, innerHeight / 2 - 100, 200, 200)
+  move = new Rect(mouse.x, mouse.y)
+  move.fill('red')
 })
 
 animate(() => {
+  move.x = mouse.x - move.width / 2
+  move.y = mouse.y - move.height / 2
+  if (move.isTouching(standStill)) standStill.fill('sage')
+  else standStill.fill('#313131')
   draw()
 })

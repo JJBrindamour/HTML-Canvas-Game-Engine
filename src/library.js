@@ -44,11 +44,12 @@ OBJECT CLASSES
 export let objects = []
 
 class Object {
-  constructor(x = innerWidth / 2, y = innerHeight / 2, width, height) {
-    this.x = x
-    this.y = y
+  constructor(x, y, width, height) {
+    this.x = x ? x : innerWidth / 2 - width / 2
+    this.y = y ? y : innerHeight / 2 - height / 2
     this.width = width
     this.height = height
+    this.collider = null
     this._strokeWeight = 0
     this._strokeColor = 'black'
     this._fillColor = '#313131'
@@ -68,9 +69,11 @@ class Object {
     this._strokeWeight = strokeWeight
   }
 
-  draw() {
-    console.log('draw')
+  isTouching() {
+    return true
   }
+
+  draw() {}
 
   update() {}
 }
@@ -83,6 +86,7 @@ export class Rect extends Object {
   }
 
   draw() {
+    this.update()
     c.beginPath()
     c.fillStyle = String(this._fillColor)
     c.strokeStyle = String(this._strokeColor)
@@ -117,6 +121,7 @@ export class Line extends Object {
   }
 
   draw() {
+    this.update
     c.beginPath()
     c.strokeStyle = String(this._strokeColor)
     c.lineWidth = String(this._weight)
@@ -126,8 +131,6 @@ export class Line extends Object {
     if (this._weight > 0) c.stroke()
     c.closePath()
   }
-
-  update() {}
 }
 
 ///////////////////////////////////////////////
@@ -142,6 +145,7 @@ export class Ellipse extends Object {
   }
 
   draw() {
+    this.update()
     c.beginPath()
     c.fillStyle = String(this._fillColor)
     c.strokeStyle = String(this._strokeColor)
@@ -151,8 +155,6 @@ export class Ellipse extends Object {
     if (this._strokeWeight > 0) c.stroke()
     c.closePath()
   }
-
-  update() {}
 }
 
 ///////////////////////////////////////////////
@@ -178,10 +180,9 @@ export class Sprite extends Object {
   }
 
   draw() {
+    this.update()
     c.drawImage(this.image, this.x, this.y, this.width, this.height)
   }
-
-  update() {}
 }
 
 ///////////////////////////////////////////////
@@ -206,6 +207,7 @@ export class Text extends Object {
 
 
   draw() {
+    this.update()
     c.beginPath()
     c.fillStyle = String(this._fillColor)
     c.strokeStyle = String(this._strokeColor)
@@ -216,8 +218,6 @@ export class Text extends Object {
     if (this._strokeWeight > 0) c.strokeText(this.text, this.x, this.y)
     c.closePath()
   }
-
-  update() {}
 }
 
 /* 
